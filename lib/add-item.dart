@@ -20,6 +20,7 @@ class _AddItem extends State<AddItem> {
   _AddItem({this.itemsRef});
   final _formKey = GlobalKey<FormState>();
   final itemName = TextEditingController();
+  final place = TextEditingController();
   DatabaseReference itemsRef;
   Map<String, double> _startLocation;
   Map<String, double> _currentLocation;
@@ -34,7 +35,12 @@ class _AddItem extends State<AddItem> {
   final MAPAPIKEY = "AIzaSyBxOIz-0sskG8CgVWZFdSVawQ0P2VOjQoI"; 
   Image image1;
   // final
-
+  @override
+    void dispose() {
+      itemName.dispose();
+      place.dispose();
+      super.dispose();
+    }
   initPlatformState() async {
     Map<String, double> location;
     // Platform messages may fail, so we use a try/catch PlatformException.
@@ -110,6 +116,26 @@ class _AddItem extends State<AddItem> {
                 },
                 controller: itemName,
               ),
+              Padding(  //placeholder image instead of this maybe
+                padding: EdgeInsets.only(bottom: 40.0),
+              ),
+              TextFormField(
+                autocorrect: false,
+                decoration: InputDecoration(
+                  labelText: "Where are you?",
+                  border: OutlineInputBorder(borderSide: BorderSide(color: Colors.blueAccent))
+                ),
+                style: TextStyle(
+                  fontSize: 18.0,
+                  color: Colors.black
+                ),
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please enter the place you are leaving this.';
+                  }
+                },
+                controller: place,
+              ),
               _currentLocation != null?
               //   Image.network(
               //     "https://maps.googleapis.com/maps/api/staticmap?center=${_currentLocation["latitude"]},${_currentLocation["longitude"]}&zoom=18&size=640x400&markers=color:blue%7Clabel:S%7C${_currentLocation["latitude"]},${_currentLocation["longitude"]}&key=${MAPAPIKEY}"
@@ -128,7 +154,8 @@ class _AddItem extends State<AddItem> {
                         "itemName": itemName.text,
                         "latitude": _currentLocation["latitude"].toString(),
                         "longitude": _currentLocation["longitude"].toString(),
-                        "datetime": DateTime.now().toString()
+                        "datetime": DateTime.now().toString(),
+                        "place": place.text
                       });
                       Navigator.pop(context);
                     }
@@ -136,15 +163,15 @@ class _AddItem extends State<AddItem> {
                   child: Text('Add Item'),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: RaisedButton(
-                  onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>MyHomePage(title: 'Image Picker')));
-                  },
-                  child: Text('Add Image'),
-                ),
-              ),
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(vertical: 16.0),
+              //   child: RaisedButton(
+              //     onPressed: () {
+              //       Navigator.push(context, MaterialPageRoute(builder: (context)=>MyHomePage(title: 'Image Picker')));
+              //     },
+              //     child: Text('Add Image'),
+              //   ),
+              // ),
             ]
           ),
         ),

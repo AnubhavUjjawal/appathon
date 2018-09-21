@@ -4,6 +4,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'add-item.dart';
+import 'family-members.dart';
+import 'package:intl/intl.dart';
 
 FirebaseApp app;
 Future<void> main() async {
@@ -58,6 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final username = "anubhav_u16"; //username is hardcoded since there is no login as of now.
   int _counter;
   DatabaseReference _itemsRef;
+  DatabaseReference _familyRef;
   DatabaseReference _addedItems;
   StreamSubscription<Event> _counterSubscription;
   StreamSubscription<Event> _messagesSubscription;
@@ -72,6 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     // Demonstrates configuring to the database using a file
     _itemsRef = FirebaseDatabase.instance.reference().child('${username}/added_items');
+    _familyRef = FirebaseDatabase.instance.reference().child('${username}/family_members');
     // Demonstrates configuring the database directly
     database = new FirebaseDatabase(app: widget.app);
     _addedItems = database.reference().child(username);
@@ -164,7 +168,7 @@ Future<Null> _sendData() async {
               ),
               onTap: (){
                 Navigator.pop(context);
-                // Navigator.push(context, MaterialPageRoute(builder: (context)=>LoginForm()));
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>FamilyMembers(app: app, familyRef: _familyRef, username: username,)));
               },
             ),
           ],
@@ -179,12 +183,48 @@ Future<Null> _sendData() async {
           // print("again");
           print(snapshot.value);
           return Column(children: <Widget>[
-            ListTile(
-              title: Text(
-                snapshot.value["itemName"],
-                style: TextStyle(fontSize: 20.0),
+             ExpansionTile(
+              title: new Text(snapshot.value["itemName"].toString(),
+                style: new TextStyle(
+                  fontSize: 20.0
+                ),
               ),
-              onTap: ()=>print(snapshot.value),
+              children: <Widget>[
+                // new Padding(
+                //   padding: EdgeInsets.all(12.0),
+                //   child: new Text(snapshot.value["datetime"].toString(),
+                //     style: new TextStyle(
+                //       fontSize: 15.0
+                //     ),),
+                // ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: Text(DateFormat('d MMMM EEEE H:m').format(DateTime.parse(snapshot.value["datetime"].toString())) ,
+                          style: new TextStyle(
+                            fontSize: 15.0
+                          ),), 
+                            ),
+                            
+                          ],
+                        ),
+                      ),
+                    FloatingActionButton(
+                      onPressed: (){
+                        database.reference().child('${username}/added_items/${snapshot.key}').remove();
+                      },
+                      tooltip: 'Increment',
+                      child: const Icon(Icons.delete),
+                    ),
+                    
+                  ],
+                )
+              ],
             ),
           ]);
         }
